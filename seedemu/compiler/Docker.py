@@ -956,6 +956,10 @@ class Docker(Compiler):
                 self._log('compiling service node {}...'.format(name))
                 self.__services += self._compileNode(obj)
 
+            if type == 'vpnnode':
+                self._log('compiling service node {}...'.format(name))
+                self.__services += self._compileNode(obj)
+
         if self.__client_enabled:
             self._log('enabling seedemu-client...')
 

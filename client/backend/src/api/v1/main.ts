@@ -31,15 +31,15 @@ const getContainers: () => Promise<SeedContainerInfo[]> = async function() {
 } 
 
 socketHandler.getLoggers().forEach(logger => logger.setSettings({
-    minLevel: 'warn'
+    minLevel: 'debug'
 }));
 
 sniffer.getLoggers().forEach(logger => logger.setSettings({
-    minLevel: 'warn'
+    minLevel: 'debug'
 }));
 
 controller.getLoggers().forEach(logger => logger.setSettings({
-    minLevel: 'warn'
+    minLevel: 'debug'
 }));
 
 router.get('/network', async function(req, res, next) {

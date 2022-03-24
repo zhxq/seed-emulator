@@ -187,7 +187,7 @@ class Network(Printable, Registrable, Vertex):
         @param asn optional. If interface type is InternetExchange, the asn for
         IP address mapping.
         """
-        assert not (nodeRole == nodeRole.Host and self.__type == NetworkType.InternetExchange), 'trying to assign IX netwotk to non-router node'
+        #assert not (nodeRole == nodeRole.Host and self.__type == NetworkType.InternetExchange), 'trying to assign IX netwotk to non-router node'
 
         if self.__type == NetworkType.InternetExchange: return self.__prefix[self.__aac.mapIxAddress(asn)]
         return self.__prefix[self.__assigners[nodeRole].next()]
@@ -216,7 +216,6 @@ class Network(Printable, Registrable, Vertex):
 
         @returns self, for chaining API calls.
         """
-        assert self.__type == NetworkType.Local, 'remote access can only be enabled on local networks.'
         self.__rap = provider
 
         return self

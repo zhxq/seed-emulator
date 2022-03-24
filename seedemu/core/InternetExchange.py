@@ -18,6 +18,7 @@ class InternetExchange(Printable, Configurable):
     __net: Network
     __rs: Node
     __name: str
+    __brNode: Node
 
     def __init__(self, id: int, prefix: str = "auto", aac: AddressAssignmentConstraint = None):
         """!
@@ -38,7 +39,28 @@ class InternetExchange(Printable, Configurable):
         self.__net = Network(self.__name, NetworkType.InternetExchange, network, aac, False)
 
         self.__rs.joinNetwork(self.__name)
+        self.__brNode = None
+    def registerNodes(self, emulator: Emulator):
+        """!
+        @brief register all nodes in the as in the emulation.
 
+        Note: this is to be invoked by the renderer.
+
+        @param emulator emulator to register nodes in.
+        """
+
+        reg = emulator.getRegistry()
+            
+        brNode = None
+        if self.__net.getRemoteAccessProvider() != None:
+            rap = self.__net.getRemoteAccessProvider()
+
+            self.__brNode = Node("vpn-{}".format(self.__name), NodeRole.RouteServer, self.__id)
+            brNet = emulator.getServiceNetwork()
+            
+            rap.configureRemoteAccess(emulator, self.__net, self.__brNode, brNet)
+            reg.register('ix', 'vpnnode', "vpn-{}".format(self.__name), self.__brNode)
+            
     def configure(self, emulator: Emulator):
         reg = emulator.getRegistry()
 
@@ -46,6 +68,8 @@ class InternetExchange(Printable, Configurable):
         reg.register('ix', 'rs', self.__name, self.__rs)
 
         self.__rs.configure(emulator)
+        if self.__brNode != None:
+            self.__brNode.configure(emulator)
 
     def getId(self) -> int:
         """!

@@ -143,6 +143,7 @@ class Routing(Layer):
     def render(self, emulator: Emulator):
         reg = emulator.getRegistry()
         for ((scope, type, name), obj) in reg.getAll().items():
+            self._log("Currently handling {}/{}/{}".format(scope, type, name))
             if type == 'rs' or type == 'rnode':
                 assert issubclass(obj.__class__, Router), 'routing: render: adding new RS/Router after routing layer configured is not currently supported.'
 
@@ -152,26 +153,29 @@ class Routing(Layer):
                     self._log("Sealing real-world router as{}/{}...".format(rnode.getAsn(), rnode.getName()))
                     rnode.seal()
 
-            if type == 'hnode':
+            if type == 'hnode' or type == 'vpnnode':
                 hnode: Node = obj
                 hifaces: List[Interface] = hnode.getInterfaces()
                 assert len(hifaces) == 1, 'Host {} in as{} has != 1 interfaces'.format(name, scope)
                 hif = hifaces[0]
                 hnet: Network = hif.getNet()
+                self._log(hif)
                 rif: Interface = None
-
-                cur_scope = ScopedRegistry(scope, reg)
-                for router in cur_scope.getByType('rnode'):
-                    if rif != None: break
-                    for riface in router.getInterfaces():
-                        if riface.getNet() == hnet:
-                            rif = riface
-                            break
-                
-                assert rif != None, 'Host {} in as{} in network {}: no router'.format(name, scope, hnet.getName())
-                self._log("Setting default route for host {} ({}) to router {}".format(name, hif.getAddress(), rif.getAddress()))
-                hnode.appendStartCommand('ip rou del default 2> /dev/null')
-                hnode.appendStartCommand('ip route add default via {} dev {}'.format(rif.getAddress(), rif.getNet().getName()))
+                if type != 'vpnnode':
+                    cur_scope = ScopedRegistry(scope, reg)
+                    for router in cur_scope.getByType('rnode'):
+                        if rif != None: break
+                        for riface in router.getInterfaces():
+                            self._log("riface {}".format(riface))
+                            if riface.getNet() == hnet:
+                                self._log("riface.getNet {}".format(riface.getNet()))
+                                rif = riface
+                                break
+                    
+                    assert rif != None, 'Host {} in as{} in network {}: no router'.format(name, scope, hnet.getName())
+                    self._log("Setting default route for host {} ({}) to router {}".format(name, hif.getAddress(), rif.getAddress()))
+                    hnode.appendStartCommand('ip rou del default 2> /dev/null')
+                    hnode.appendStartCommand('ip route add default via {} dev {}'.format(rif.getAddress(), rif.getNet().getName()))
 
     def print(self, indent: int) -> str:
         out = ' ' * indent

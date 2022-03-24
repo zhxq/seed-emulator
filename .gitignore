@@ -22,3 +22,7 @@ client/backend/node_modules
 client/backend/bin
 *.bin
 output
+examples/*
+!examples/distributed_seedemu/
+examples/distributed_seedemu/output/*
+examples/distributed_seedemu/output_edit/*

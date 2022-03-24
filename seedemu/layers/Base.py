@@ -62,6 +62,8 @@ class Base(Layer, Graphable):
                 asobj.setNameServers(self.__name_servers)
 
             asobj.registerNodes(emulator)
+        for ix in self.__ixes.values():
+            ix.registerNodes(emulator)
 
         self._log('setting up internet exchanges...')
         for ix in self.__ixes.values(): ix.configure(emulator)
@@ -71,8 +73,8 @@ class Base(Layer, Graphable):
 
     def render(self, emulator: Emulator) -> None:
         for ((scope, type, name), obj) in emulator.getRegistry().getAll().items():
-
-            if not (type == 'rs' or type == 'rnode' or type == 'hnode'):
+            self._log(type)
+            if not (type == 'rs' or type == 'rnode' or type == 'hnode' or type == 'vpnnode'):
                 continue
             
             node: Node = obj
