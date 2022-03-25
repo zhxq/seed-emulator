@@ -161,7 +161,7 @@ class Routing(Layer):
                 hnet: Network = hif.getNet()
                 self._log(hif)
                 rif: Interface = None
-                
+
                 cur_scope = ScopedRegistry(scope, reg)
                 for router in cur_scope.getByType('rnode'):
                     if rif != None: break
