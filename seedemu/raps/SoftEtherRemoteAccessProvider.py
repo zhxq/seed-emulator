@@ -20,6 +20,7 @@ make -C build install
 SoftEtherRapFileTemplates['se_server_startup_script'] = '''\
 #!/bin/bash
 echo "VPN server ready! run 'docker exec -it $HOSTNAME /bin/bash' to attach to this VPN server" >&2
+vpnbridge stop
 vpnserver start
 sleep 5
 vpncmd localhost:443 /SERVER /ADMINHUB:default /CMD BridgeCreate default /DEVICE:eth0 /TAP:no
@@ -44,6 +45,7 @@ if [[ -z $2 ]]; then
 else
     export VPN_SERVER_PORT=$2
 fi
+vpnserver stop
 vpnbridge stop
 /softether_client_startup
 '''
@@ -51,6 +53,7 @@ vpnbridge stop
 SoftEtherRapFileTemplates['se_client_startup_script'] = '''\
 #!/bin/bash
 echo "VPN client ready! run 'docker exec -it $HOSTNAME /bin/bash' to attach to this VPN client" >&2
+vpnserver stop
 vpnbridge start
 sleep 5
 vpncmd localhost:443 /SERVER /ADMINHUB:bridge /CMD BridgeCreate bridge /DEVICE:eth0 /TAP:no
