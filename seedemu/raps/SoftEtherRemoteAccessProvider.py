@@ -23,7 +23,7 @@ echo "VPN server ready! run 'docker exec -it $HOSTNAME /bin/bash' to attach to t
 vpnbridge stop
 vpnserver start
 sleep 5
-vpncmd localhost:443 /SERVER /ADMINHUB:default /CMD BridgeCreate default /DEVICE:eth0 /TAP:no
+vpncmd localhost:443 /SERVER /ADMINHUB:default /CMD BridgeCreate default /DEVICE:{devname} /TAP:no
 vpncmd localhost:443 /SERVER /ADMINHUB:default /CMD UserCreate {username} /group:none /realname:none /note:none
 vpncmd localhost:443 /SERVER /ADMINHUB:default /CMD UserAnonymousSet {username}
 vpncmd localhost:443 /SERVER /ADMINHUB:default /CMD UserGet {username}
@@ -56,7 +56,7 @@ echo "VPN client ready! run 'docker exec -it $HOSTNAME /bin/bash' to attach to t
 vpnserver stop
 vpnbridge start
 sleep 5
-vpncmd localhost:443 /SERVER /ADMINHUB:bridge /CMD BridgeCreate bridge /DEVICE:eth0 /TAP:no
+vpncmd localhost:443 /SERVER /ADMINHUB:bridge /CMD BridgeCreate bridge /DEVICE:{devname} /TAP:no
 vpncmd localhost:443 /SERVER /ADMINHUB:bridge /CMD CascadeCreate test /SERVER:$VPN_SERVER_ADDR:$VPN_SERVER_PORT /HUB:default /USERNAME:{username}
 vpncmd localhost:443 /SERVER /ADMINHUB:bridge /CMD CascadeAnonymousSet test
 vpncmd localhost:443 /SERVER /ADMINHUB:bridge /CMD CascadeOnline test
@@ -111,11 +111,13 @@ class SoftEtherRemoteAccessProvider(RemoteAccessProvider):
         brNode.addBuildCommand("mkdir -p /vpn && cd /vpn && git clone https://github.com/SoftEtherVPN/SoftEtherVPN.git && cd SoftEtherVPN && git submodule init && git submodule update && ./configure && make -C build && make -C build install")
 
         brNode.setFile('/softether_server_startup', SoftEtherRapFileTemplates['se_server_startup_script'].format(
+            devname = netObject.getName(),
             username = self.__username
         ))
 
         brNode.setFile('/softether_connector', SoftEtherRapFileTemplates['se_client_connector'])
         brNode.setFile('/softether_client_startup', SoftEtherRapFileTemplates['se_client_startup_script'].format(
+            devname = netObject.getName(),
             username = self.__username
         ))
             
