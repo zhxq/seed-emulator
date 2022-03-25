@@ -171,10 +171,10 @@ class Routing(Layer):
                             rif = riface
                             break
                     
-                    assert rif != None, 'Host {} in as{} in network {}: no router'.format(name, scope, hnet.getName())
-                    self._log("Setting default route for host {} ({}) to router {}".format(name, hif.getAddress(), rif.getAddress()))
-                    hnode.appendStartCommand('ip rou del default 2> /dev/null')
-                    hnode.appendStartCommand('ip route add default via {} dev {}'.format(rif.getAddress(), rif.getNet().getName()))
+                assert rif != None, 'Host {} in as{} in network {}: no router'.format(name, scope, hnet.getName())
+                self._log("Setting default route for host {} ({}) to router {}".format(name, hif.getAddress(), rif.getAddress()))
+                hnode.appendStartCommand('ip rou del default 2> /dev/null')
+                hnode.appendStartCommand('ip route add default via {} dev {}'.format(rif.getAddress(), rif.getNet().getName()))
 
     def print(self, indent: int) -> str:
         out = ' ' * indent
