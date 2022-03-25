@@ -161,6 +161,7 @@ class Routing(Layer):
                 hnet: Network = hif.getNet()
                 self._log(hif)
                 rif: Interface = None
+                
                 cur_scope = ScopedRegistry(scope, reg)
                 for router in cur_scope.getByType('rnode'):
                     if rif != None: break
@@ -170,7 +171,7 @@ class Routing(Layer):
                             self._log("riface.getNet {}".format(riface.getNet()))
                             rif = riface
                             break
-                    
+                
                 assert rif != None, 'Host {} in as{} in network {}: no router'.format(name, scope, hnet.getName())
                 self._log("Setting default route for host {} ({}) to router {}".format(name, hif.getAddress(), rif.getAddress()))
                 hnode.appendStartCommand('ip rou del default 2> /dev/null')
