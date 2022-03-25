@@ -45,7 +45,7 @@ else
     export VPN_SERVER_PORT=$2
 fi
 vpnbridge stop
-
+/softether_client_startup
 '''
 
 SoftEtherRapFileTemplates['se_client_startup_script'] = '''\
@@ -72,7 +72,7 @@ class SoftEtherRemoteAccessProvider(RemoteAccessProvider):
     __ovpn_key: str
 
 
-    def __init__(self, authMethod: str = None, username: str = "seed", ip: int = 2, startPort_443: int = 10443, startPort_992: int = 10992, startPort_5555: int = 15555):
+    def __init__(self, authMethod: str = None, username: str = "seed", ip: int = 2, startPort_443: int = 10443, startPort_992: int = 10992, startPort_5555: int = 15555, defaultRemoteServerAddr: str = None, defaultRemoteServerPort: int = None):
         """!
         @brief SoftEther remote access provider constructor.
 
@@ -94,8 +94,10 @@ class SoftEtherRemoteAccessProvider(RemoteAccessProvider):
         
         self.__username = username
         self.__ip_end = ip
+        self.__client_default_server_addr = defaultRemoteServerAddr
+        self.__client_default_server_port = defaultRemoteServerPort
     def getName(self) -> str:
-        return "SoftEtherClient"
+        return "SoftEtherNode"
 
     def configureRemoteAccess(self, emulator: Emulator, netObject: Network, brNode: Node, brNet: Network):
         self._log('setting up SoftEther remote access for {} in AS{}...'.format(netObject.getName(), brNode.getAsn()))
@@ -119,6 +121,9 @@ class SoftEtherRemoteAccessProvider(RemoteAccessProvider):
         brNode.appendStartCommand('chmod +x /softether_client_startup')
         brNode.appendStartCommand('chmod +x /softether_connector')
         brNode.appendStartCommand('/softether_server_startup')
+
+        if self.__client_default_server_addr != None and self.__client_default_server_port != None:
+            brNode.appendStartCommand('/softether_connector {} {}'.format(self.__client_default_server_addr, self.__client_default_server_port))
 
         #if netObject.getType() != NetworkType.InternetExchange:
         #brNode.appendStartCommand('ip route add default via {} dev {}'.format(brNet.getPrefix()[1], brNet.getName()))
