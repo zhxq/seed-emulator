@@ -101,7 +101,7 @@ class SoftEtherRemoteAccessProvider(RemoteAccessProvider):
 
     def configureRemoteAccess(self, emulator: Emulator, netObject: Network, brNode: Node, brNet: Network):
         self._log('setting up SoftEther remote access for {} in AS{}...'.format(netObject.getName(), brNode.getAsn()))
-
+        brNode.setPrivileged(True)
         brNode.addSoftware('apt-utils pkg-config curl cmake gcc g++ make libncurses5-dev libssl-dev libsodium-dev libreadline-dev zlib1g-dev build-essential dnsutils ipcalc iproute2 iputils-ping jq mtr-tiny nano netcat tcpdump termshark vim-nox git zsh')
         brNode.addSoftware('bridge-utils')
         #brNode.setFile('/softether_install', SoftEtherRapFileTemplates['se_server_build_script'])
