@@ -55,7 +55,7 @@ class InternetExchange(Printable, Configurable):
         if self.__net.getRemoteAccessProvider() != None:
             rap = self.__net.getRemoteAccessProvider()
 
-            self.__brNode = Node("vpn-{}".format(self.__name), NodeRole.VPN, self.__id)
+            self.__brNode = Node("vpn-{}".format(self.__name), NodeRole.Host, self.__id)
             brNet = emulator.getServiceNetwork()
             
             rap.configureRemoteAccess(emulator, self.__net, self.__brNode, brNet)
