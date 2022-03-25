@@ -1,5 +1,5 @@
 from seedemu.core import RemoteAccessProvider, Emulator, Network, Node
-from seedemu.core.enums import NodeRole
+from seedemu.core.enums import NodeRole, NetworkType
 from typing import Dict
 from itertools import repeat
 
@@ -72,7 +72,7 @@ class SoftEtherRemoteAccessProvider(RemoteAccessProvider):
     __ovpn_key: str
 
 
-    def __init__(self, authMethod: str = None, username: str = "seed", startPort_443: int = 10443, startPort_992: int = 10992, startPort_5555: int = 15555):
+    def __init__(self, authMethod: str = None, username: str = "seed", ip: int = 2, startPort_443: int = 10443, startPort_992: int = 10992, startPort_5555: int = 15555):
         """!
         @brief SoftEther remote access provider constructor.
 
@@ -93,6 +93,7 @@ class SoftEtherRemoteAccessProvider(RemoteAccessProvider):
         self.__cur_port_5555 = startPort_5555
         
         self.__username = username
+        self.__ip_end = ip
     def getName(self) -> str:
         return "SoftEtherClient"
 
@@ -101,8 +102,8 @@ class SoftEtherRemoteAccessProvider(RemoteAccessProvider):
 
         brNode.addSoftware('apt-utils pkg-config curl cmake gcc g++ make libncurses5-dev libssl-dev libsodium-dev libreadline-dev zlib1g-dev build-essential dnsutils ipcalc iproute2 iputils-ping jq mtr-tiny nano netcat tcpdump termshark vim-nox git zsh')
         brNode.addSoftware('bridge-utils')
-        brNode.setFile('/softether_install', SoftEtherRapFileTemplates['se_server_build_script'])
-        brNode.addBuildCommand("chmod +x /softether_install && /softether_install")
+        #brNode.setFile('/softether_install', SoftEtherRapFileTemplates['se_server_build_script'])
+        brNode.addBuildCommand("mkdir -p /vpn && cd /vpn && git clone https://github.com/SoftEtherVPN/SoftEtherVPN.git && cd SoftEtherVPN && git submodule init && git submodule update && ./configure && make -C build && make -C build install")
 
         brNode.setFile('/softether_server_startup', SoftEtherRapFileTemplates['se_server_startup_script'].format(
             username = self.__username
@@ -119,16 +120,13 @@ class SoftEtherRemoteAccessProvider(RemoteAccessProvider):
         brNode.appendStartCommand('chmod +x /softether_connector')
         brNode.appendStartCommand('/softether_server_startup')
 
+        #if netObject.getType() != NetworkType.InternetExchange:
         #brNode.appendStartCommand('ip route add default via {} dev {}'.format(brNet.getPrefix()[1], brNet.getName()))
-
-        # brNode.joinNetwork(brNet.getName())
-        # self._log('Joining {}'.format(brNet.getName()))
-        brNode.joinNetwork(netObject.getName())
+        brNode.joinNetwork(brNet.getName())
+        self._log('Joining {}'.format(brNet.getName()))
+        brNode.joinNetwork(netObject.getName(), netObject.getPrefix()[self.__ip_end])
         self._log('Joining {}'.format(netObject.getName()))
 
-        brNode.addPort(self.__cur_port_443, 443, 'udp')
-        brNode.addPort(self.__cur_port_443, 443, 'tcp')
-        brNode.addPort(self.__cur_port_992, 992, 'udp')
-        brNode.addPort(self.__cur_port_992, 992, 'tcp')
-        brNode.addPort(self.__cur_port_5555, 5555, 'udp')
-        brNode.addPort(self.__cur_port_5555, 5555, 'tcp')
+        brNode.addPort(self.__cur_port_443, 443)
+        brNode.addPort(self.__cur_port_992, 992)
+        brNode.addPort(self.__cur_port_5555, 5555)

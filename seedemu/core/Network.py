@@ -189,7 +189,8 @@ class Network(Printable, Registrable, Vertex):
         """
         #assert not (nodeRole == nodeRole.Host and self.__type == NetworkType.InternetExchange), 'trying to assign IX netwotk to non-router node'
 
-        if self.__type == NetworkType.InternetExchange: return self.__prefix[self.__aac.mapIxAddress(asn)]
+        if self.__type == NetworkType.InternetExchange and nodeRole == nodeRole.RouteServer: 
+            return self.__prefix[self.__aac.mapIxAddress(asn)]
         return self.__prefix[self.__assigners[nodeRole].next()]
 
     def associate(self, node: 'Node'):

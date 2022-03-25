@@ -153,7 +153,7 @@ class Routing(Layer):
                     self._log("Sealing real-world router as{}/{}...".format(rnode.getAsn(), rnode.getName()))
                     rnode.seal()
 
-            if type == 'hnode' or type == 'vpnnode':
+            if type == 'hnode':
                 hnode: Node = obj
                 hifaces: List[Interface] = hnode.getInterfaces()
                 assert len(hifaces) == 1, 'Host {} in as{} has != 1 interfaces'.format(name, scope)
@@ -161,16 +161,15 @@ class Routing(Layer):
                 hnet: Network = hif.getNet()
                 self._log(hif)
                 rif: Interface = None
-                if type != 'vpnnode':
-                    cur_scope = ScopedRegistry(scope, reg)
-                    for router in cur_scope.getByType('rnode'):
-                        if rif != None: break
-                        for riface in router.getInterfaces():
-                            self._log("riface {}".format(riface))
-                            if riface.getNet() == hnet:
-                                self._log("riface.getNet {}".format(riface.getNet()))
-                                rif = riface
-                                break
+                cur_scope = ScopedRegistry(scope, reg)
+                for router in cur_scope.getByType('rnode'):
+                    if rif != None: break
+                    for riface in router.getInterfaces():
+                        self._log("riface {}".format(riface))
+                        if riface.getNet() == hnet:
+                            self._log("riface.getNet {}".format(riface.getNet()))
+                            rif = riface
+                            break
                     
                     assert rif != None, 'Host {} in as{} in network {}: no router'.format(name, scope, hnet.getName())
                     self._log("Setting default route for host {} ({}) to router {}".format(name, hif.getAddress(), rif.getAddress()))
