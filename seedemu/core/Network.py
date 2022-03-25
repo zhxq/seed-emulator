@@ -189,7 +189,7 @@ class Network(Printable, Registrable, Vertex):
         """
         #assert not (nodeRole == nodeRole.Host and self.__type == NetworkType.InternetExchange), 'trying to assign IX netwotk to non-router node'
 
-        if self.__type == NetworkType.InternetExchange and nodeRole == nodeRole.Host: 
+        if self.__type == NetworkType.InternetExchange and nodeRole != nodeRole.Host: 
             return self.__prefix[self.__aac.mapIxAddress(asn)]
         return self.__prefix[self.__assigners[nodeRole].next()]
 
