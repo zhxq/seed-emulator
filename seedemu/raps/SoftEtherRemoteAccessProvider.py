@@ -120,7 +120,6 @@ class SoftEtherRemoteAccessProvider(RemoteAccessProvider):
         brNode.appendStartCommand('chmod +x /softether_server_startup')
         brNode.appendStartCommand('chmod +x /softether_client_startup')
         brNode.appendStartCommand('chmod +x /softether_connector')
-        brNode.appendStartCommand('/softether_server_startup')
 
         if self.__client_default_server_addr != None and self.__client_default_server_port != None:
             brNode.appendStartCommand('/softether_connector {} {}'.format(self.__client_default_server_addr, self.__client_default_server_port))
