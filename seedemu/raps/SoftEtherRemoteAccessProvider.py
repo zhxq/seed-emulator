@@ -124,8 +124,9 @@ class SoftEtherRemoteAccessProvider(RemoteAccessProvider):
 
         if self.__client_default_server_addr != None and self.__client_default_server_port != None:
             brNode.appendStartCommand('/softether_connector {} {}'.format(self.__client_default_server_addr, self.__client_default_server_port))
-
-        #if netObject.getType() != NetworkType.InternetExchange:
+        else:
+            brNode.appendStartCommand('/softether_server_startup')
+        
         brNode.appendStartCommand('ip route add default via {} dev {}'.format(brNet.getPrefix()[1], brNet.getName()))
         brNode.joinNetwork(brNet.getName())
         self._log('Joining {}'.format(brNet.getName()))
