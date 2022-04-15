@@ -7,8 +7,8 @@ from seedemu.core import Emulator, Binding, Filter
 from seedemu.raps import SoftEtherRemoteAccessProvider
 from seedemu.compiler import Docker
 
-emu1    = Emulator()
-emu2    = Emulator()
+emu1    = Emulator(name = "emu1")
+emu2    = Emulator(name = "emu2")
 cloud   = Cloud()
 base1    = Base()
 base2    = Base()
@@ -22,7 +22,7 @@ ospf1    = Ospf()
 ospf2    = Ospf()
 web1     = WebService()
 web2     = WebService()
-vpn    = SoftEtherRemoteAccessProvider()
+vpn      = SoftEtherRemoteAccessProvider()
 
 ###############################################################################
 

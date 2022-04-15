@@ -75,7 +75,7 @@ class SoftEtherRemoteAccessProvider(RemoteAccessProvider):
     __ovpn_key: str
 
 
-    def __init__(self, authMethod: str = None, username: str = "seed", ip: int = 2, startPort_443: int = 10443, startPort_992: int = 10992, startPort_5555: int = 15555, defaultRemoteServerAddr: str = None, defaultRemoteServerPort: int = None):
+    def __init__(self, authMethod: str = None, username: str = "seed", ip: int = 2, startPort_443: int = 10443, startPort_992: int = 10992, startPort_5555: int = 15555, defaultRemoteServerAddr: str = None, defaultRemoteServerPort: int = None, serverEmu = "emu1"):
         """!
         @brief SoftEther remote access provider constructor.
 
@@ -99,6 +99,7 @@ class SoftEtherRemoteAccessProvider(RemoteAccessProvider):
         self.__ip_end = ip
         self.__client_default_server_addr = defaultRemoteServerAddr
         self.__client_default_server_port = defaultRemoteServerPort
+        self.__emu_server = serverEmu
     def getName(self) -> str:
         return "SoftEtherNode"
 
@@ -109,22 +110,23 @@ class SoftEtherRemoteAccessProvider(RemoteAccessProvider):
         brNode.addSoftware('bridge-utils')
         #brNode.setFile('/softether_install', SoftEtherRapFileTemplates['se_server_build_script'])
         brNode.addBuildCommand("mkdir -p /vpn && cd /vpn && git clone https://github.com/SoftEtherVPN/SoftEtherVPN.git && cd SoftEtherVPN && git submodule init && git submodule update && ./configure && make -C build && make -C build install")
-
-        brNode.setFile('/softether_server_startup', SoftEtherRapFileTemplates['se_server_startup_script'].format(
-            devname = netObject.getName(),
-            username = self.__username
-        ))
-
-        brNode.setFile('/softether_connector', SoftEtherRapFileTemplates['se_client_connector'])
-        brNode.setFile('/softether_client_startup', SoftEtherRapFileTemplates['se_client_startup_script'].format(
-            devname = netObject.getName(),
-            username = self.__username
-        ))
+        if emulator.getName() == self.__emu_server:
+            # is server
+            brNode.setFile('/softether_server_startup', SoftEtherRapFileTemplates['se_server_startup_script'].format(
+                devname = netObject.getName(),
+                username = self.__username
+            ))
+            brNode.appendStartCommand('chmod +x /softether_server_startup')
+        else:
+            brNode.setFile('/softether_connector', SoftEtherRapFileTemplates['se_client_connector'])
+            brNode.setFile('/softether_client_startup', SoftEtherRapFileTemplates['se_client_startup_script'].format(
+                devname = netObject.getName(),
+                username = self.__username
+            ))
             
-        # note: ovpn_startup will invoke interface_setup, and replace interface_setup script with a dummy. 
-        brNode.appendStartCommand('chmod +x /softether_server_startup')
-        brNode.appendStartCommand('chmod +x /softether_client_startup')
-        brNode.appendStartCommand('chmod +x /softether_connector')
+            brNode.appendStartCommand('chmod +x /softether_client_startup')
+            brNode.appendStartCommand('chmod +x /softether_connector')
+        
 
         if self.__client_default_server_addr != None and self.__client_default_server_port != None:
             brNode.appendStartCommand('/softether_connector {} {}'.format(self.__client_default_server_addr, self.__client_default_server_port))

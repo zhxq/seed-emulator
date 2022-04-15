@@ -88,8 +88,9 @@ class Emulator:
 
     __service_net: Network
     __service_net_prefix: str
+    __name: str
 
-    def __init__(self, serviceNetworkPrefix: str = '192.168.66.0/24'):
+    def __init__(self, serviceNetworkPrefix: str = '192.168.66.0/24', name: str = "emu1"):
         """!
         @brief Construct a new emulation.
         
@@ -111,6 +112,8 @@ class Emulator:
 
         self.__service_net_prefix = '192.168.160.0/23'
         self.__service_net = None
+
+        self.__name = name
 
     def __render(self, layerName, optional: bool, configure: bool):
         """!
@@ -541,3 +544,5 @@ class Emulator:
             self.__bindings = self.__registry.get('seedemu', 'list', 'bindingdb')
 
         return self
+    def getName(self) -> str:
+        return self.__name
