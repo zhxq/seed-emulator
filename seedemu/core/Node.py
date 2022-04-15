@@ -270,7 +270,8 @@ class Node(Printable, Registrable, Configurable, Vertex):
 
         @param emulator Emulator object to use to configure.
         """
-        assert not self.__configured, 'Node already configured.'
+        if self.__configured:
+            return
         assert not self.__asn == 0, 'Virtual physical node must not be used in render/configure'
 
         reg = emulator.getRegistry()
@@ -315,12 +316,16 @@ class Node(Printable, Registrable, Configurable, Vertex):
                 self.__xcs[(peername, peerasn)] = (localaddr, netname)
 
         if len(self.__name_servers) == 0:
+            self.__configured = True
             return
         
         self.appendStartCommand(': > /etc/resolv.conf')
         for s in self.__name_servers:
             self.appendStartCommand('echo "nameserver {}" >> /etc/resolv.conf'.format(s))
-
+        self.__configured = True
+    def isConfigured(self) -> bool:
+        print(self.__configured)
+        return self.__configured
     def setNameServers(self, servers: List[str]) -> Node:
         """!
         @brief set recursive name servers to use on this node. Overwrites

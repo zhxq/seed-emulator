@@ -1,3 +1,4 @@
+from .Cloud import Cloud
 from .Base import Base
 from .Routing import Routing, Router, RealWorldRouter
 from .Ebgp import Ebgp, PeerRelationship

@@ -84,6 +84,8 @@ class Routing(Layer):
         for ((scope, type, name), obj) in reg.getAll().items():
             if type == 'rs':
                 rs_node: Node = obj
+                if rs_node.isConfigured():
+                    continue
                 self.__installBird(rs_node)
                 rs_node.appendStartCommand('[ ! -d /run/bird ] && mkdir /run/bird')
                 rs_node.appendStartCommand('bird -d', True)
@@ -145,6 +147,8 @@ class Routing(Layer):
         for ((scope, type, name), obj) in reg.getAll().items():
             self._log("Currently handling {}/{}/{}".format(scope, type, name))
             if type == 'rs' or type == 'rnode':
+                if type == 'rs':
+                    continue
                 assert issubclass(obj.__class__, Router), 'routing: render: adding new RS/Router after routing layer configured is not currently supported.'
 
             if type == 'rnode':

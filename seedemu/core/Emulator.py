@@ -327,7 +327,9 @@ class Emulator:
         for (layer, _) in self.__layers.db.values():
             self.__loadDependencies(layer.getDependencies())
 
-        # render base first
+        # render cloud and base first
+        # also don't re-render cloud if it has been rendered
+        self.__render('Cloud', True, True)
         self.__render('Base', False, True)
 
         # collect all pending vnode names

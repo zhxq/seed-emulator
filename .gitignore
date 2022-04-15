@@ -26,3 +26,5 @@ examples/*
 !examples/distributed_seedemu/
 examples/distributed_seedemu/output/*
 examples/distributed_seedemu/output_edit/*
+examples/distributed_seedemu/output1/*
+examples/distributed_seedemu/output2/*
