@@ -96,7 +96,7 @@ class SoftEtherRemoteAccessProvider(RemoteAccessProvider):
         self.__cur_port_5555 = startPort_5555
         
         self.__username = username
-        self.__ip_end = ip
+        self.__ip_start = ip
         self.__client_default_server_addr = defaultRemoteServerAddr
         self.__client_default_server_port = defaultRemoteServerPort
         self.__emu_server = serverEmu
@@ -136,7 +136,8 @@ class SoftEtherRemoteAccessProvider(RemoteAccessProvider):
         brNode.appendStartCommand('ip route add default via {} dev {}'.format(brNet.getPrefix()[1], brNet.getName()))
         brNode.joinNetwork(brNet.getName())
         self._log('Joining {}'.format(brNet.getName()))
-        brNode.joinNetwork(netObject.getName(), netObject.getPrefix()[self.__ip_end])
+        brNode.joinNetwork(netObject.getName(), netObject.getPrefix()[self.__ip_start])
+        self.__ip_start += 1
         self._log('Joining {}'.format(netObject.getName()))
 
         brNode.addPort(self.__cur_port_443, 443)
