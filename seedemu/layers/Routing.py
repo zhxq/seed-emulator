@@ -84,8 +84,7 @@ class Routing(Layer):
         for ((scope, type, name), obj) in reg.getAll().items():
             if type == 'rs':
                 rs_node: Node = obj
-                if rs_node.isConfigured():
-                    continue
+                
                 self.__installBird(rs_node)
                 rs_node.appendStartCommand('[ ! -d /run/bird ] && mkdir /run/bird')
                 rs_node.appendStartCommand('bird -d', True)

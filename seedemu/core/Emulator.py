@@ -239,6 +239,8 @@ class Emulator:
 
         lname = layer.getName()
         assert lname not in self.__layers.db, 'layer {} already added.'.format(lname)
+        if lname == 'Cloud':
+            layer.addEmu(self)
         self.__registry.register('seedemu', 'layer', lname, layer)
         self.__layers.db[lname] = (layer, False)
 
@@ -260,7 +262,8 @@ class Emulator:
         @returns list of layers.
         """
         return self.__registry.getByType('seedemu', 'layer')
-
+    def removeLayer(self, layerName: str):
+        del(self.__layers.db[layerName])
     def resolvVnode(self, vnode: str) -> core.Node:
         """!
         @brief resolve physical node for the given virtual node.
@@ -325,7 +328,7 @@ class Emulator:
         
         @returns self, for chaining API calls.
         """
-        assert not self.__rendered, 'already rendered.'
+        #assert not self.__rendered, 'already rendered.'
 
         for (layer, _) in self.__layers.db.values():
             self.__loadDependencies(layer.getDependencies())

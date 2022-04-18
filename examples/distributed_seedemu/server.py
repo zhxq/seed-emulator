@@ -54,25 +54,33 @@ emu2.addBinding(Binding('web1', filter = Filter(asn = 151, nodeName = 'web')))
 
 ix100.getPeeringLan().enableRemoteAccess(vpn)
 
-#as150.getNetwork('net0').enableRemoteAccess(vpn)
+ebgp1.addPrivatePeerings(100, [150], [151], PeerRelationship.Peer)
+
+
 ###############################################################################
 # Rendering
 
+# Add cloud to both emulators first
+# so that they know the existence of each other
 emu1.addLayer(cloud)
-emu1.addLayer(base1)
-emu1.addLayer(routing1)
-emu1.addLayer(ebgp1)
-emu1.addLayer(ibgp1)
-emu1.addLayer(ospf1)
-emu1.addLayer(web1)
-
 emu2.addLayer(cloud)
+emu1.addLayer(base1)
 emu2.addLayer(base2)
+emu1.addLayer(routing1)
 emu2.addLayer(routing2)
-emu2.addLayer(ebgp2)
-emu2.addLayer(ibgp2)
-emu2.addLayer(ospf2)
+
+emu1.addLayer(web1)
 emu2.addLayer(web2)
+
+emu1.render()
+emu2.render()
+
+emu1.addLayer(ibgp1)
+emu2.addLayer(ibgp2)
+emu1.addLayer(ospf1)
+emu2.addLayer(ospf2)
+emu1.addLayer(ebgp1)
+emu2.addLayer(ebgp2)
 
 emu1.render()
 emu2.render()

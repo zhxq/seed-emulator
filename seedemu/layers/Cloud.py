@@ -41,6 +41,7 @@ class Cloud(Layer, Graphable):
     __ases: Dict[int, AutonomousSystem]
     __ixes: Dict[int, InternetExchange]
     __name_servers: List[str]
+    __emus: List[Emulator]
     __configured: bool
     def __init__(self):
         """!
@@ -51,6 +52,7 @@ class Cloud(Layer, Graphable):
         self.__ixes = {}
         self.__name_servers = []
         self.__configured = False
+        self.__emus = []
 
     def getName(self) -> str:
         return "Cloud"
@@ -179,7 +181,10 @@ class Cloud(Layer, Graphable):
         """
         asn = ixObject.getId()
         self.__ixes[asn] = ixObject
-
+    def addEmu(self, emu: Emulator):
+        self.__emus.append(emu)
+    def getEmus(self) -> List[Emulator]:
+        return self.__emus
     def getAsns(self) -> List[int]:
         """!
         @brief Get list of ASNs.

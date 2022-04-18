@@ -111,6 +111,8 @@ class Ebgp(Layer, Graphable):
         assert routerA != routerB, 'cannot peer with oneself.'
 
         if rsNode != None:
+            print(type(rsNode))
+            print(dir(rsNode))
             rsNode.addProtocol('bgp', 'p_as{}'.format(routerA.getAsn()), EbgpFileTemplates["rs_bird_peer"].format(
                 localAddress = addrA,
                 localAsn = rsNode.getAsn(),
@@ -323,28 +325,36 @@ class Ebgp(Layer, Graphable):
         return self.__rs_peers 
 
     def configure(self, emulator: Emulator) -> None:
+        emus = []
         reg = emulator.getRegistry()
+        if reg.has('seedemu', 'layer', 'Cloud'):
+            cloud = emulator.getLayer('Cloud')
+            emus = cloud.getEmus()
+        else:
+            emus = [emulator]
 
         for (ix, peer) in self.__rs_peers:
-            ix_reg = ScopedRegistry('ix', reg)
-            p_reg = ScopedRegistry(str(peer), reg)
-
-            ix_net: Network = ix_reg.get('net', 'ix{}'.format(ix))
-            ix_rs: Router = ix_reg.get('rs', 'ix{}'.format(ix))
-            rs_ifs = ix_rs.getInterfaces()
-            assert len(rs_ifs) == 1, '??? ix{} rs has {} interfaces.'.format(ix, len(rs_ifs))
-            rs_if = rs_ifs[0]
-
-            p_rnodes: List[Router] = p_reg.getByType('rnode')
             p_ixnode: Router = None
             p_ixif: Interface = None
-            for node in p_rnodes:
+            for emu in emus:
                 if p_ixnode != None: break
-                for iface in node.getInterfaces():
-                    if iface.getNet() == ix_net:
-                        p_ixnode = node
-                        p_ixif = iface
-                        break
+                reg = emu.getRegistry()
+                ix_reg = ScopedRegistry('ix', reg)
+                p_reg = ScopedRegistry(str(peer), reg)
+
+                ix_net: Network = ix_reg.get('net', 'ix{}'.format(ix))
+                ix_rs: Router = ix_reg.get('rs', 'ix{}'.format(ix))
+                rs_ifs = ix_rs.getInterfaces()
+                assert len(rs_ifs) == 1, '??? ix{} rs has {} interfaces.'.format(ix, len(rs_ifs))
+                rs_if = rs_ifs[0]
+                p_rnodes: List[Router] = p_reg.getByType('rnode')
+                for node in p_rnodes:
+                    if p_ixnode != None: break
+                    for iface in node.getInterfaces():
+                        if iface.getNet() == ix_net:
+                            p_ixnode = node
+                            p_ixif = iface
+                            break
 
             assert p_ixnode != None, 'cannot resolve peering: as{} not in ix{}'.format(peer, ix)
             self._log("adding peering: {} as {} (RS) <-> {} as {}".format(rs_if.getAddress(), ix, p_ixif.getAddress(), peer))
@@ -352,9 +362,6 @@ class Ebgp(Layer, Graphable):
             self.__createPeer(ix_rs, p_ixnode, rs_if.getAddress(), p_ixif.getAddress(), PeerRelationship.Peer)
 
         for (a, b), rel in self.__xc_peerings.items():
-            a_reg = ScopedRegistry(str(a), reg)
-            b_reg = ScopedRegistry(str(b), reg)
-
             a_router: Router = None
             b_router: Router = None
 
@@ -362,23 +369,28 @@ class Ebgp(Layer, Graphable):
             b_addr: str = None
 
             hit = False
-
-            for node in a_reg.getByType('rnode'):
-                router: Router = node
-                for (peername, peerasn), (localaddr, _) in router.getCrossConnects().items():
-                    if peerasn != b: continue
-                    if not b_reg.has('rnode', peername): continue
-
-                    hit = True
-                    a_router = node
-                    b_router = b_reg.get('rnode', peername)
-
-                    a_addr = str(localaddr.ip)
-                    (b_ifaddr, _) = b_router.getCrossConnect(a, a_router.getName())
-                    b_addr = str(b_ifaddr.ip)
-
-                    break
+            for emu in emus:
                 if hit: break
+                reg = emu.getRegistry()
+                a_reg = ScopedRegistry(str(a), reg)
+                b_reg = ScopedRegistry(str(b), reg)
+
+                for node in a_reg.getByType('rnode'):
+                    router: Router = node
+                    for (peername, peerasn), (localaddr, _) in router.getCrossConnects().items():
+                        if peerasn != b: continue
+                        if not b_reg.has('rnode', peername): continue
+
+                        hit = True
+                        a_router = node
+                        b_router = b_reg.get('rnode', peername)
+
+                        a_addr = str(localaddr.ip)
+                        (b_ifaddr, _) = b_router.getCrossConnect(a, a_router.getName())
+                        b_addr = str(b_ifaddr.ip)
+
+                        break
+                    if hit: break
 
             assert hit, 'cannot find XC to configure peer AS{} <--> AS{}'.format(a, b)
 
@@ -387,35 +399,42 @@ class Ebgp(Layer, Graphable):
             self.__createPeer(a_router, b_router, a_addr, b_addr, rel)
 
         for (ix, a, b), rel in self.__peerings.items():
-            ix_reg = ScopedRegistry('ix', reg)
-            a_reg = ScopedRegistry(str(a), reg)
-            b_reg = ScopedRegistry(str(b), reg)
-
-            ix_net: Network = ix_reg.get('net', 'ix{}'.format(ix))
-            a_rnodes: List[Router] = a_reg.getByType('rnode')
-            b_rnodes: List[Router] = b_reg.getByType('rnode')
-
+            
             a_ixnode: Router = None
             a_ixif: Interface = None
-            for node in a_rnodes:
+            for emu in emus:
                 if a_ixnode != None: break
-                for iface in node.getInterfaces():
-                    if iface.getNet() == ix_net:
-                        a_ixnode = node
-                        a_ixif = iface
-                        break
+                reg = emu.getRegistry()
+                ix_reg = ScopedRegistry('ix', reg)
+                ix_net: Network = ix_reg.get('net', 'ix{}'.format(ix))
+                a_reg = ScopedRegistry(str(a), reg)
+                a_rnodes: List[Router] = a_reg.getByType('rnode')
+                for node in a_rnodes:
+                    if a_ixnode != None: break
+                    for iface in node.getInterfaces():
+                        if iface.getNet() == ix_net:
+                            a_ixnode = node
+                            a_ixif = iface
+                            break
             
             assert a_ixnode != None, 'cannot resolve peering: as{} not in ix{}'.format(a, ix)
 
             b_ixnode: Router = None
             b_ixif: Interface = None
-            for node in b_rnodes:
+            for emu in emus:
                 if b_ixnode != None: break
-                for iface in node.getInterfaces():
-                    if iface.getNet() == ix_net:
-                        b_ixnode = node
-                        b_ixif = iface
-                        break
+                reg = emu.getRegistry()
+                ix_reg = ScopedRegistry('ix', reg)
+                ix_net: Network = ix_reg.get('net', 'ix{}'.format(ix))
+                b_reg = ScopedRegistry(str(b), reg)
+                b_rnodes: List[Router] = b_reg.getByType('rnode')
+                for node in b_rnodes:
+                    if b_ixnode != None: break
+                    for iface in node.getInterfaces():
+                        if iface.getNet() == ix_net:
+                            b_ixnode = node
+                            b_ixif = iface
+                            break
             
             assert b_ixnode != None, 'cannot resolve peering: as{} not in ix{}'.format(b, ix)
 
