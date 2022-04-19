@@ -111,8 +111,6 @@ class Ebgp(Layer, Graphable):
         assert routerA != routerB, 'cannot peer with oneself.'
 
         if rsNode != None:
-            print(type(rsNode))
-            print(dir(rsNode))
             rsNode.addProtocol('bgp', 'p_as{}'.format(routerA.getAsn()), EbgpFileTemplates["rs_bird_peer"].format(
                 localAddress = addrA,
                 localAsn = rsNode.getAsn(),
