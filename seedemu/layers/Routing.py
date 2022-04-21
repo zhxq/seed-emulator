@@ -162,14 +162,12 @@ class Routing(Layer):
                 assert len(hifaces) == 1, 'Host {} in as{} has != 1 interfaces'.format(name, scope)
                 hif = hifaces[0]
                 hnet: Network = hif.getNet()
-                self._log(hif)
                 rif: Interface = None
 
                 cur_scope = ScopedRegistry(scope, reg)
                 for router in cur_scope.getByType('rnode'):
                     if rif != None: break
                     for riface in router.getInterfaces():
-                        self._log("riface {}".format(riface))
                         if riface.getNet() == hnet:
                             self._log("riface.getNet {}".format(riface.getNet()))
                             rif = riface

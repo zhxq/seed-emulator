@@ -90,10 +90,10 @@ class Cloud(Layer, Graphable):
                 [l, b, d] = iface.getLinkProperties()
                 ifinfo += '{}:{}:{}:{}:{}\n'.format(net.getName(), net.getPrefix(), l, b, d)
 
-            node.setFile('/ifinfo.txt', ifinfo)
-            node.setFile('/interface_setup', CloudFileTemplates['interface_setup_script'])
-            node.insertStartCommand(0, '/interface_setup')
-            node.insertStartCommand(0, 'chmod +x /interface_setup')
+            # node.setFile('/ifinfo.txt', ifinfo)
+            # node.setFile('/interface_setup', CloudFileTemplates['interface_setup_script'])
+            # node.insertStartCommand(0, '/interface_setup')
+            # node.insertStartCommand(0, 'chmod +x /interface_setup')
 
     def setNameServers(self, servers: List[str]) -> Cloud:
         """!

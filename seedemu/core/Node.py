@@ -217,6 +217,7 @@ class Node(Printable, Registrable, Configurable, Vertex):
     __privileged: bool
 
     __configured: bool
+    __rendered: bool
     __pending_nets: List[Tuple[str, str]]
     __xcs: Dict[Tuple[str, int], Tuple[IPv4Interface, str]]
 
@@ -252,6 +253,7 @@ class Node(Printable, Registrable, Configurable, Vertex):
         self.__pending_nets = []
         self.__xcs = {}
         self.__configured = False
+        self.__rendered = False
 
         self.__shared_folders = {}
         self.__persistent_storages = []
@@ -324,8 +326,11 @@ class Node(Printable, Registrable, Configurable, Vertex):
             self.appendStartCommand('echo "nameserver {}" >> /etc/resolv.conf'.format(s))
         self.__configured = True
     def isConfigured(self) -> bool:
-        print(self.__configured)
         return self.__configured
+    def isRendered(self) -> bool:
+        return self.__rendered
+    def setRendered(self):
+        self.__rendered = True
     def setNameServers(self, servers: List[str]) -> Node:
         """!
         @brief set recursive name servers to use on this node. Overwrites
