@@ -78,8 +78,6 @@ class Base(Layer, Graphable):
                 continue
             
             node: Node = obj
-            if node.isRendered():
-                continue
             ifinfo = ''
             for iface in node.getInterfaces():
                 net = iface.getNet()
@@ -88,6 +86,8 @@ class Base(Layer, Graphable):
 
             node.setFile('/ifinfo.txt', ifinfo)
             node.setFile('/interface_setup', BaseFileTemplates['interface_setup_script'])
+            if node.isRendered():
+                continue
             node.insertStartCommand(0, '/interface_setup')
             node.insertStartCommand(0, 'chmod +x /interface_setup')
             node.setRendered()

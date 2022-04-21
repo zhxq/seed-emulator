@@ -166,5 +166,5 @@ for i in range(len(emus)):
     emu.render()
     print(emu.getName())
     #print(dns.getZone('.').getRecords())
-    emu.compile(Docker(), './output_'+str(i), override=True)
+    emu.compile(Docker(), './output_'+str(i + 1), override=True)
 
