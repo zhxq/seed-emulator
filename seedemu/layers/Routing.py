@@ -55,7 +55,7 @@ class Routing(Layer):
 
     __loopback_assigner: IPv4Network
     __loopback_pos: int
-    
+
     def __init__(self, loopback_range: str = '10.0.0.0/16'):
         """!
         @brief Routing layre constructor.
@@ -84,7 +84,9 @@ class Routing(Layer):
         for ((scope, type, name), obj) in reg.getAll().items():
             if type == 'rs':
                 rs_node: Node = obj
-                
+                if rs_node.isConfiguredByLayer(self.getName()):
+                    continue
+                rs_node.setConfiguredByLayer(self.getName())
                 self.__installBird(rs_node)
                 rs_node.appendStartCommand('[ ! -d /run/bird ] && mkdir /run/bird')
                 rs_node.appendStartCommand('bird -d', True)
@@ -102,6 +104,9 @@ class Routing(Layer):
                 
             if type == 'rnode':
                 rnode: Router = obj
+                if rnode.isConfiguredByLayer(self.getName()):
+                    continue
+                rnode.setConfiguredByLayer(self.getName())
                 if not issubclass(rnode.__class__, Router): rnode.__class__ = Router
 
                 self._log("Setting up loopback interface for AS{} Router {}...".format(scope, name))

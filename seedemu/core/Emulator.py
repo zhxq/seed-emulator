@@ -372,8 +372,7 @@ class Emulator:
 
         # FIXME
         for (name, (layer, _)) in self.__layers.db.items():
-            if name == 'Cloud' or name == 'Base':
-                self.__layers.db[name] = (layer, False)
+            self.__layers.db[name] = (layer, False)
 
         for layerName in self.__layers.db.keys():
             self.__render(layerName, False, False)

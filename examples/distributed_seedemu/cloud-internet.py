@@ -147,10 +147,8 @@ for i in range(round_start, round_end):
     # Add layers to the emulator
     emu.addLayer(cloud)
     emu.addLayer(base)
-    emu.addLayer(web)
     emu.addLayer(routing)
     #emu.addLayer(dhcp)
-
     # Save it to a component file, so it can be used by other emulators
     emu.dump('base-component.bin')
 
@@ -160,6 +158,7 @@ for i in range(len(emus)):
     emu.render()
 for i in range(len(emus)):
     emu = emus[i]
+    emu.addLayer(webs[i])
     emu.addLayer(ibgps[i])
     emu.addLayer(ospfs[i])
     emu.addLayer(ebgps[i])

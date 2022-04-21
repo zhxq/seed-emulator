@@ -86,11 +86,11 @@ class Base(Layer, Graphable):
 
             node.setFile('/ifinfo.txt', ifinfo)
             node.setFile('/interface_setup', BaseFileTemplates['interface_setup_script'])
-            if node.isRendered():
+            if node.isRenderedByLayer(self.getName()):
                 continue
             node.insertStartCommand(0, '/interface_setup')
             node.insertStartCommand(0, 'chmod +x /interface_setup')
-            node.setRendered()
+            node.setRenderedByLayer(self.getName())
 
     def setNameServers(self, servers: List[str]) -> Base:
         """!
