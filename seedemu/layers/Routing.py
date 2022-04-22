@@ -157,12 +157,18 @@ class Routing(Layer):
 
             if type == 'rnode':
                 rnode: Router = obj
+                if rnode.isRenderedByLayer(self.getName()):
+                    continue
+                rnode.setRenderedByLayer(self.getName())
                 if issubclass(rnode.__class__, RealWorldRouter):
                     self._log("Sealing real-world router as{}/{}...".format(rnode.getAsn(), rnode.getName()))
                     rnode.seal()
 
             if type == 'hnode':
                 hnode: Node = obj
+                if hnode.isRenderedByLayer(self.getName()):
+                    continue
+                hnode.setRenderedByLayer(self.getName())
                 hifaces: List[Interface] = hnode.getInterfaces()
                 assert len(hifaces) == 1, 'Host {} in as{} has != 1 interfaces'.format(name, scope)
                 hif = hifaces[0]
