@@ -632,6 +632,12 @@ class Docker(Compiler):
                 key = 'role',
                 value = 'Route Server'
             )
+        
+        if type == 'vpnnode':
+            labels += DockerCompilerFileTemplates['compose_label_meta'].format(
+                key = 'role',
+                value = 'VPN Node'
+            )
 
         if node.getDisplayName() != None:
             labels += DockerCompilerFileTemplates['compose_label_meta'].format(

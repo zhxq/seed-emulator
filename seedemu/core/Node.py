@@ -333,7 +333,7 @@ class Node(Printable, Registrable, Configurable, Vertex):
         if name not in self.__configured_by_layer:
             return False
         return self.__configured_by_layer[name]
-    def setConfiguredByLayer(self, name: str) -> bool:
+    def setConfiguredByLayer(self, name: str):
         self.__configured_by_layer[name] = True
     def isRenderedByLayer(self, name: str) -> bool:
         if name not in self.__rendered_by_layer:
