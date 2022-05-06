@@ -17,6 +17,7 @@ cloud = Cloud()
 # All others emulators will become clients for ix100
 se100 = SoftEtherRemoteAccessProvider(serverEmu="emu1")
 ix100 = cloud.createInternetExchange(100)
+# Attach the VPN node to ix100 network
 ix100.getPeeringLan().enableRemoteAccess(se100)
 
 # Create SoftEther RAP for ix101, and choose emu2 as the server
@@ -24,6 +25,7 @@ ix100.getPeeringLan().enableRemoteAccess(se100)
 # Choose to expose 11443 for port 443, and so on
 se101 = SoftEtherRemoteAccessProvider(serverEmu="emu2", startPort_443=11443, startPort_5555=16555, startPort_992=11992)
 ix101 = cloud.createInternetExchange(101)
+# Attach the VPN node to ix101 network
 ix101.getPeeringLan().enableRemoteAccess(se101)
 
 # All layers should share these layers to promote inter-emulator peering
