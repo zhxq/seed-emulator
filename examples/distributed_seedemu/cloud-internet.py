@@ -3,25 +3,33 @@
 
 from seedemu import *
 
+# We need to store the layers to render after every emulator is created
 emus: List[Emulator] = []
 bases: List[Base] = []
 routings: List[Routing] = []
-ebgps: List[Ebgp] = []
-ibgps: List[Ibgp] = []
-ospfs: List[Ospf] = []
 webs: List[WebService] = []
 ovpns: List[OpenVpnRemoteAccessProvider] = []
 ses: List[SoftEtherRemoteAccessProvider] = []
 
+# Create Cloud layer
 cloud = Cloud()
+# Create SoftEther RAP for ix100, and choose emu1 as the server
+# All others emulators will become clients for ix100
 se100 = SoftEtherRemoteAccessProvider(serverEmu="emu1")
 ix100 = cloud.createInternetExchange(100)
 ix100.getPeeringLan().enableRemoteAccess(se100)
 
+# Create SoftEther RAP for ix101, and choose emu2 as the server
+# All others emulators will become clients for ix101
+# Choose to expose 11443 for port 443, and so on
 se101 = SoftEtherRemoteAccessProvider(serverEmu="emu2", startPort_443=11443, startPort_5555=16555, startPort_992=11992)
 ix101 = cloud.createInternetExchange(101)
 ix101.getPeeringLan().enableRemoteAccess(se101)
 
+# All layers should share these layers to promote inter-emulator peering
+ebgp    = Ebgp()
+ibgp    = Ibgp()
+ospf    = Ospf()
 ACoeff = 3
 BCoeff = 3
 CCoeff = 2
@@ -38,12 +46,7 @@ for i in range(round_start, round_end):
     bases.append(base)
     routing = Routing()
     routings.append(routing)
-    ebgp    = Ebgp()
-    ebgps.append(ebgp)
-    ibgp    = Ibgp()
-    ibgps.append(ibgp)
-    ospf    = Ospf()
-    ospfs.append(ospf)
+    
     web     = WebService()
     webs.append(web)
     #dhcp    = DHCPService()
@@ -112,6 +115,8 @@ for i in range(round_start, round_end):
 
     # To buy transit services from another autonomous system, 
     # we will use private peering
+
+    # For ix100 and 101, we want to peer to other ASes in different emulators
     for j in range(i, round_end):
         BB = j * ACoeff
         CC = j * CCoeff
@@ -149,21 +154,23 @@ for i in range(round_start, round_end):
     emu.addLayer(base)
     emu.addLayer(routing)
     #emu.addLayer(dhcp)
-    # Save it to a component file, so it can be used by other emulators
-    emu.dump('base-component.bin')
 
-    # Uncomment the following if you want to generate the final emulation files
+
+# First round render, to create node objects
+# After this, we can perform inter-emulator BGP
 for i in range(len(emus)):
     emu = emus[i]
     emu.render()
+
+# Second round render - render all other layers
 for i in range(len(emus)):
     emu = emus[i]
     emu.addLayer(webs[i])
-    emu.addLayer(ibgps[i])
-    emu.addLayer(ospfs[i])
-    emu.addLayer(ebgps[i])
+    emu.addLayer(ibgp)
+    emu.addLayer(ospf)
+    emu.addLayer(ebgp)
     emu.render()
     print(emu.getName())
     #print(dns.getZone('.').getRecords())
-    emu.compile(Docker(), './output_'+str(i + 1), override=True)
+    emu.compile(Docker(), './emus/output_'+str(i + 1), override=True)
 
